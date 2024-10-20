@@ -1,41 +1,37 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { ethers } from 'ethers';
-import { supabase } from '../supabaseClient'; // For storing user interactions, if needed
+import { supabase } from '../supabaseClient';
 import styles from '../styles/AIStudio.module.css';
-import Replicate from 'replicate'; // Make sure to import Replicate correctly
 
 const AIStudio = () => {
   const { user } = useUser();
   const [prompt, setPrompt] = useState('');
-  const [generatedImage, setGeneratedImage] = useState(null);
-  const [video, setVideo] = useState(null);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [video, setVideo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // New state to manage errors
+  const [error, setError] = useState<string | null>(null);
 
-  // Function to generate an image using the Replicate API
+  // Function to generate an image using the backend API
   const generateImage = async () => {
     setLoading(true);
-    setError(null); // Reset error on each attempt
-
-    const replicate = new Replicate({
-      auth: process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN, // Make sure the token is available
-    });
+    setError(null);
 
     try {
-      const output = await replicate.run('black-forest-labs/flux-schnell', {
-        input: {
-          prompt,
-          go_fast: true,
-          megapixels: '1',
-          num_outputs: 1,
-          aspect_ratio: '1:1',
-          output_format: 'webp', // Use webp format as specified
-          output_quality: 80,
-          num_inference_steps: 4,
+      const response = await fetch('/api/generateImage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ prompt }),
       });
-      setGeneratedImage(output[0]); // Assuming the API returns an array of image URLs
+
+      const data = await response.json();
+      if (response.ok) {
+        setGeneratedImage(data.imageUrl);
+      } else {
+        throw new Error(data.message);
+      }
     } catch (error) {
       console.error('Image generation failed:', error);
       setError('Failed to generate the image. Please try again.');
@@ -44,7 +40,7 @@ const AIStudio = () => {
     }
   };
 
-  // Function to convert the image into a video using the second AI model
+  // Function to convert the image into a video (can remain unchanged)
   const convertToVideo = async () => {
     setLoading(true);
     const replicate = new Replicate({
@@ -54,14 +50,14 @@ const AIStudio = () => {
     try {
       const output = await replicate.run('ali-vilab/i2vgen-xl', {
         input: {
-          image: generatedImage, // Pass the generated image URL here
+          image: generatedImage,
           prompt: 'Dynamic video from generated image',
           max_frames: 16,
           guidance_scale: 9,
           num_inference_steps: 50,
         },
       });
-      setVideo(output[0]); // The generated video
+      setVideo(output[0]);
     } catch (error) {
       console.error('Video conversion failed:', error);
       setError('Failed to convert the image to video. Please try again.');
@@ -70,16 +66,12 @@ const AIStudio = () => {
     }
   };
 
-  // Function to mint the final output to Polygon
+  // Function to mint the final output to Polygon (can remain unchanged)
   const mintToPolygon = async () => {
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      // Connect to the user's wallet
       const address = await signer.getAddress();
-
-      // Here you would use a contract to mint the NFT (not shown in full detail here)
-      // You would send a request to a Polygon-based smart contract to mint the asset
 
       console.log('Minting NFT for:', address);
     } catch (error) {
