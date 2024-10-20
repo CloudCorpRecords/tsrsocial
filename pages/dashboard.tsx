@@ -5,14 +5,22 @@ import { ethers } from 'ethers';
 import { useClerk } from '@clerk/nextjs';
 import styles from '../styles/Dashboard.module.css';
 
+// Circle API for USDC/EURC payments
+const CircleAPI = 'https://api.circle.com/v1/payments'; // Replace with actual production or sandbox API URL
+const CircleApiKey = process.env.NEXT_PUBLIC_CIRCLE_API_KEY; // Ensure API key is stored securely in the environment
+
 const Dashboard = () => {
   const { user, isSignedIn } = useUser();
   const { signOut } = useClerk(); // Clerk's signOut function
   const [ethBalance, setEthBalance] = useState('');
-  const [posts, setPosts] = useState([]); // State for posts
-  const [newPostText, setNewPostText] = useState(''); // State for new post text
-  const [newPostImage, setNewPostImage] = useState(null); // State for new post image
-  const [messages, setMessages] = useState([]); // State for messages
+  const [usdcBalance, setUsdcBalance] = useState(0); // USDC balance state
+  const [eurcBalance, setEurcBalance] = useState(0); // EURC balance state
+  const [posts, setPosts] = useState([]); // Posts state
+  const [newPostText, setNewPostText] = useState(''); // New post text
+  const [newPostImage, setNewPostImage] = useState(null); // New post image
+  const [messages, setMessages] = useState([]); // Messages state
+  const [paymentAmount, setPaymentAmount] = useState(''); // Payment amount
+  const [recipientWallet, setRecipientWallet] = useState(''); // Recipient wallet address
   const router = useRouter();
 
   useEffect(() => {
@@ -29,6 +37,9 @@ const Dashboard = () => {
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const balance = await provider.getBalance(user.primaryWeb3Wallet.web3Wallet);
           setEthBalance(ethers.utils.formatEther(balance));
+
+          // Fetch stablecoin balances (USDC/EURC)
+          fetchCircleBalances(user.primaryWeb3Wallet.web3Wallet);
         } catch (error) {
           console.error('Error fetching wallet balance:', error);
         }
@@ -37,9 +48,25 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  // Example function to fetch USDC/EURC balances from Circle API
+  const fetchCircleBalances = async (walletAddress) => {
+    try {
+      const response = await fetch(`${CircleAPI}/wallets/${walletAddress}`, {
+        headers: {
+          Authorization: `Bearer ${CircleApiKey}`,
+        },
+      });
+      const data = await response.json();
+      setUsdcBalance(data.usdcBalance);
+      setEurcBalance(data.eurcBalance);
+    } catch (error) {
+      console.error('Error fetching USDC/EURC balances:', error);
+    }
+  };
+
   // Handle sign-out and redirect to the home page
   const handleSignOut = async () => {
-    await signOut({ redirectUrl: '/' }); // Redirect after sign out
+    await signOut({ redirectUrl: '/' });
   };
 
   // Fetch messages from the server
@@ -74,12 +101,40 @@ const Dashboard = () => {
     setNewPostImage(null); // Clear image input
   };
 
-  // Handle upvoting posts
-  const handleUpvote = (postId) => {
-    const updatedPosts = posts.map((post) =>
-      post.id === postId ? { ...post, upvotes: post.upvotes + 1 } : post
-    );
-    setPosts(updatedPosts);
+  // Send USDC/EURC payments
+  const sendPayment = async () => {
+    try {
+      const response = await fetch(CircleAPI, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${CircleApiKey}`,
+        },
+        body: JSON.stringify({
+          amount: {
+            currency: 'USD', // Change to 'EUR' for EURC
+            amount: paymentAmount,
+          },
+          destination: {
+            address: recipientWallet,
+          },
+          source: {
+            type: 'wallet',
+            id: user.primaryWeb3Wallet.web3Wallet,
+          },
+          idempotencyKey: Date.now().toString(),
+        }),
+      });
+
+      const data = await response.json();
+      if (data.status === 'confirmed') {
+        alert(`Payment of ${paymentAmount} USDC sent to ${recipientWallet}`);
+      } else {
+        console.error('Payment failed:', data);
+      }
+    } catch (error) {
+      console.error('Error sending payment:', error);
+    }
   };
 
   return (
@@ -101,9 +156,9 @@ const Dashboard = () => {
           <ul>
             <li><a href="#wallet">My Wallet</a></li>
             <li><a href="#dapps">Explore dApps</a></li>
-            <li><a href="/socialMedia">Social Feed</a></li> {/* Link to social media */}
-            <li><a href="/aistudio">AI Art Studio</a></li> {/* Corrected link to AI Art Studio */}
-            <li><a href="/messages">Messages</a></li> {/* Link to messaging */}
+            <li><a href="/socialMedia">Social Feed</a></li>
+            <li><a href="/aistudio">AI Art Studio</a></li>
+            <li><a href="/messages">Messages</a></li>
             <li><a href="#settings">Settings</a></li>
           </ul>
         </nav>
@@ -116,31 +171,32 @@ const Dashboard = () => {
             <div>
               <p><strong>Wallet Address:</strong> {user.primaryWeb3Wallet.web3Wallet}</p>
               <p><strong>ETH Balance:</strong> {ethBalance} ETH</p>
+              <p><strong>USDC Balance:</strong> {usdcBalance} USDC</p>
+              <p><strong>EURC Balance:</strong> {eurcBalance} EURC</p>
             </div>
           ) : (
             <p>Loading wallet...</p>
           )}
         </section>
 
-        {/* Social Media Post Section */}
-        <section id="make-post">
-          <h3>Make a Social Media Post</h3>
-          <form onSubmit={handlePostSubmit} className={styles.postForm}>
-            <textarea
-              value={newPostText}
-              onChange={(e) => setNewPostText(e.target.value)}
-              placeholder="What's on your mind?"
-              className={styles.textArea}
-              required
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setNewPostImage(e.target.files[0])}
-              className={styles.imageInput}
-            />
-            <button className={styles.postButton} type="submit">Post</button>
-          </form>
+        {/* Payment Section */}
+        <section id="payment">
+          <h3>Send USDC or EURC</h3>
+          <input
+            type="text"
+            placeholder="Recipient Wallet"
+            value={recipientWallet}
+            onChange={(e) => setRecipientWallet(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Amount"
+            value={paymentAmount}
+            onChange={(e) => setPaymentAmount(e.target.value)}
+          />
+          <button onClick={sendPayment} className={styles.sendPaymentButton}>
+            Send Payment
+          </button>
         </section>
 
         {/* Post Feed Section */}
@@ -176,14 +232,6 @@ const Dashboard = () => {
           )}
           <p>
             Go to <a href="/messages">Messages</a> to send and receive more.
-          </p>
-        </section>
-
-        {/* AI Art Studio Section */}
-        <section id="ai-art-studio">
-          <h3>AI Art Studio</h3>
-          <p>
-            Create and mint your own AI-generated art in the <a href="/aistudio">AI Art Studio</a>.
           </p>
         </section>
 
