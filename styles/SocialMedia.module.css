@@ -1,0 +1,87 @@
+.socialMediaContainer {
+  padding: 2rem;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.postForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.textArea {
+  width: 80%;
+  height: 100px;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.imageInput {
+  margin-bottom: 1rem;
+}
+
+.postButton {
+  background-color: #4dabf7;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.postButton:hover {
+  background-color: #0070f3;
+}
+
+.postsFeed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.post {
+  background-color: #ffffff;
+  padding: 15px;
+  margin-bottom: 15px;
+  width: 80%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post p {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.postImage {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 5px;
+}
+
+.upvoteButton {
+  background-color: #4dabf7;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.upvoteButton:hover {
+  background-color: #0070f3;
+}

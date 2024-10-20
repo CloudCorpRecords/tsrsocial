@@ -2,15 +2,39 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: 'Poppins', sans-serif; /* Switching to a modern, clean font */
+  background: linear-gradient(135deg, #f06, #f90); /* Fun gradient background */
+  color: #333; /* Darker color for better contrast */
 }
 
 a {
-  color: inherit;
+  color: #ff6347; /* Fun, vibrant color */
   text-decoration: none;
+}
+
+a:hover {
+  color: #ff4500; /* Make hover interactions pop */
 }
 
 * {
   box-sizing: border-box;
+}
+
+button {
+  background-color: #ff6347;
+  border: none;
+  color: white;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #ff4500;
+}
+
+h1, h2, h3 {
+  font-family: 'Poppins', sans-serif;
 }
