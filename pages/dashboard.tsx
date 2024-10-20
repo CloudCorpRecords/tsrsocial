@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [posts, setPosts] = useState([]); // State for posts
   const [newPostText, setNewPostText] = useState(''); // State for new post text
   const [newPostImage, setNewPostImage] = useState(null); // State for new post image
+  const [messages, setMessages] = useState([]); // State for messages
   const router = useRouter();
 
   useEffect(() => {
@@ -40,6 +41,21 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     await signOut({ redirectUrl: '/' }); // Redirect after sign out
   };
+
+  // Fetch messages from the server
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch('/api/messages');
+      const data = await response.json();
+      setMessages(data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages(); // Load messages when the dashboard loads
+  }, []);
 
   // Handle post submission
   const handlePostSubmit = (e) => {
@@ -87,6 +103,7 @@ const Dashboard = () => {
             <li><a href="#dapps">Explore dApps</a></li>
             <li><a href="/socialMedia">Social Feed</a></li> {/* Link to social media */}
             <li><a href="/aistudio">AI Art Studio</a></li> {/* Corrected link to AI Art Studio */}
+            <li><a href="/messages">Messages</a></li> {/* Link to messaging */}
             <li><a href="#settings">Settings</a></li>
           </ul>
         </nav>
@@ -143,6 +160,23 @@ const Dashboard = () => {
           ) : (
             <p>No posts yet. Be the first to post!</p>
           )}
+        </section>
+
+        {/* Messages Section */}
+        <section id="messages">
+          <h3>Recent Messages</h3>
+          {messages.length ? (
+            messages.map((msg, index) => (
+              <div key={index}>
+                <p><strong>{msg.sender}</strong>: {msg.text}</p>
+              </div>
+            ))
+          ) : (
+            <p>No messages yet.</p>
+          )}
+          <p>
+            Go to <a href="/messages">Messages</a> to send and receive more.
+          </p>
         </section>
 
         {/* AI Art Studio Section */}
