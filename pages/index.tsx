@@ -1,19 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs'; // Clerk hook for user authentication
 import { useRouter } from 'next/router'; // To handle redirects
 import Head from 'next/head';
 import { SignInButton } from '@clerk/nextjs'; // Clerk login button
 import styles from '../styles/Home.module.css';
-import { useAccount, useConnect } from 'wagmi'; // wagmi for Web3 connections
-import { InjectedConnector } from 'wagmi/connectors/injected'; // Ledger / MetaMask connectors
 
 const Home = () => {
   const { isSignedIn } = useUser(); // Clerk user authentication status
   const router = useRouter();
-  const { connect } = useConnect({
-    connector: new InjectedConnector(),
-  });
-  const { isConnected, address } = useAccount();
+  const [isConnected, setIsConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState('');
 
   // Handle redirection manually based on Clerk authentication
   useEffect(() => {
@@ -23,14 +19,19 @@ const Home = () => {
     }
   }, [isSignedIn, router]);
 
-  const handleLedgerLogin = async () => {
-    try {
-      // Trigger Ledger login/connect
-      await connect();
-      // Redirect to dashboard after successful connection
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Failed to connect Ledger:', error);
+  // Handle wallet connection without wagmi connectors
+  const handleWalletLogin = async () => {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        setWalletAddress(accounts[0]);
+        setIsConnected(true);
+        router.push('/dashboard'); // Redirect after successful connection
+      } catch (error) {
+        console.error('Failed to connect wallet:', error);
+      }
+    } else {
+      alert('MetaMask or an Ethereum-compatible browser is required.');
     }
   };
 
@@ -55,10 +56,10 @@ const Home = () => {
           </SignInButton>
         )}
 
-        {/* Ledger Sign-In Button */}
+        {/* Wallet Sign-In Button */}
         {!isConnected && (
-          <button onClick={handleLedgerLogin} className={styles.button}>
-            Connect Ledger Wallet
+          <button onClick={handleWalletLogin} className={styles.button}>
+            Connect MetaMask Wallet
           </button>
         )}
 
