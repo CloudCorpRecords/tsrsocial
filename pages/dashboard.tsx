@@ -7,11 +7,11 @@ import styles from '../styles/Dashboard.module.css';
 
 const Dashboard = () => {
   const { user, isSignedIn } = useUser();
-  const { signOut } = useClerk(); // Use Clerk's signOut function
+  const { signOut } = useClerk(); // Clerk's signOut function
   const [ethBalance, setEthBalance] = useState('');
-  const [posts, setPosts] = useState([]); // State for storing all posts
-  const [newPostText, setNewPostText] = useState(''); // State for post text
-  const [newPostImage, setNewPostImage] = useState(null); // State for post image
+  const [posts, setPosts] = useState([]); // State for posts
+  const [newPostText, setNewPostText] = useState(''); // State for new post text
+  const [newPostImage, setNewPostImage] = useState(null); // State for new post image
   const router = useRouter();
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const Dashboard = () => {
       text: newPostText,
       image: newPostImage ? URL.createObjectURL(newPostImage) : null,
       user: user.fullName || user.username,
-      upvotes: 0
+      upvotes: 0,
     };
 
     setPosts([newPost, ...posts]); // Add new post to state
@@ -85,8 +85,9 @@ const Dashboard = () => {
           <ul>
             <li><a href="#wallet">My Wallet</a></li>
             <li><a href="#dapps">Explore dApps</a></li>
+            <li><a href="/socialMedia">Social Feed</a></li> {/* Link to social media */}
+            <li><a href="/aistudio">AI Art Studio</a></li> {/* Corrected link to AI Art Studio */}
             <li><a href="#settings">Settings</a></li>
-            <li><a href="#feed">Social Feed</a></li>
           </ul>
         </nav>
       </aside>
@@ -142,6 +143,14 @@ const Dashboard = () => {
           ) : (
             <p>No posts yet. Be the first to post!</p>
           )}
+        </section>
+
+        {/* AI Art Studio Section */}
+        <section id="ai-art-studio">
+          <h3>AI Art Studio</h3>
+          <p>
+            Create and mint your own AI-generated art in the <a href="/aistudio">AI Art Studio</a>.
+          </p>
         </section>
 
         <section id="dapps">

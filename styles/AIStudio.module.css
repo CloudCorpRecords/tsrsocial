@@ -1,0 +1,95 @@
+/* AIStudio.module.css */
+
+/* Container for the AI Studio page */
+.studioContainer {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #1a1a1a;
+  color: white;
+  min-height: 100vh;
+}
+
+/* Header section */
+.studioHeader {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Form section to submit prompts */
+.promptForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 2rem;
+}
+
+.promptInput {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  border: 2px solid #888;
+  background-color: #2c2c2c;
+  color: white;
+}
+
+.submitButton {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  background-color: #ff6347;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submitButton:hover {
+  background-color: #e55337;
+}
+
+/* Display the generated image */
+.imageDisplay {
+  margin-top: 2rem;
+}
+
+.generatedImage {
+  max-width: 100%;
+  border: 2px solid #444;
+  border-radius: 10px;
+}
+
+/* Mint Button for minting the artwork */
+.mintButton {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.mintButton:hover {
+  background-color: #3e8e41;
+}
+
+/* Loader during AI processing */
+.loadingIndicator {
+  font-size: 1.5rem;
+  margin-top: 1rem;
+  color: #f0ad4e;
+}
+
+/* Error message styling */
+.errorMessage {
+  color: red;
+  margin-top: 1rem;
+  font-size: 1.2rem;
+}
