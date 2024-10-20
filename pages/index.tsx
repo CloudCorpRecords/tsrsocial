@@ -2,12 +2,18 @@ import { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs'; // Clerk hook for user authentication
 import { useRouter } from 'next/router'; // To handle redirects
 import Head from 'next/head';
-import styles from '../styles/Home.module.css';
 import { SignInButton } from '@clerk/nextjs'; // Clerk login button
+import styles from '../styles/Home.module.css';
+import { useAccount, useConnect } from 'wagmi'; // wagmi for Web3 connections
+import { InjectedConnector } from 'wagmi/connectors/injected'; // Ledger / MetaMask connectors
 
 const Home = () => {
   const { isSignedIn } = useUser(); // Clerk user authentication status
   const router = useRouter();
+  const { connect } = useConnect({
+    connector: new InjectedConnector(),
+  });
+  const { isConnected, address } = useAccount();
 
   // Handle redirection manually based on Clerk authentication
   useEffect(() => {
@@ -16,6 +22,17 @@ const Home = () => {
       router.push('/dashboard');
     }
   }, [isSignedIn, router]);
+
+  const handleLedgerLogin = async () => {
+    try {
+      // Trigger Ledger login/connect
+      await connect();
+      // Redirect to dashboard after successful connection
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Failed to connect Ledger:', error);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -36,6 +53,13 @@ const Home = () => {
           <SignInButton mode="modal" redirectUrl="/dashboard">
             <button className={styles.button}>Join Crocial Today!</button>
           </SignInButton>
+        )}
+
+        {/* Ledger Sign-In Button */}
+        {!isConnected && (
+          <button onClick={handleLedgerLogin} className={styles.button}>
+            Connect Ledger Wallet
+          </button>
         )}
 
         <p className={styles.cta}>Connect. Explore. Own the future.</p>
